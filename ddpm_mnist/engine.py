@@ -77,6 +77,6 @@ def train(model, dataloader, optimizer, epochs, device, sampling_dir, model_dir,
             save_image(grid, sampling_dir + f"/{name}_epoch_{i+1}.png")
 
             # save model
-            torch.save(model.state_dict(), model_dir + f"/{name}.pt")
+            torch.save(model.state_dict(), model_dir + f"/{name}.pth")
 
     return loss_epoch, psnr_epoch, ssim_epoch

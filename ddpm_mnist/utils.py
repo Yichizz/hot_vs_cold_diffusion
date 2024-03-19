@@ -45,6 +45,13 @@ def read_parameters(file_path: str) -> dict:
     params['hyperparameters_training']['n_epochs'] = config.getint('hyperparameters_training', 'n_epochs', fallback=100)
     params['hyperparameters_training']['lr'] = config.getfloat('hyperparameters_training', 'lr', fallback=2e-4)
     params['hyperparameters_training']['weight_decay'] = config.getfloat('hyperparameters_training', 'weight_decay', fallback=0.0)
+    params['hyperparameters_training']['early_stopping'] = config.getboolean('hyperparameters_training', 'early_stopping', fallback=False)
+
+    # section: hyperparameters_evaluation
+    params['hyperparameters_evaluation']['n_samples'] = config.getint('hyperparameters_evaluation', 'n_samples', fallback=1000)
+
+    # section: name
+    params['name']['model_name'] = config.get('name', 'model', fallback='ddpm_mnist')
 
     return params
 

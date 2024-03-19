@@ -3,7 +3,6 @@
 # ignore generated pictures
 samples/
 contents/
-model/
 losses/
 generated/
 # ignore data folder
@@ -11,4 +10,4 @@ data/
 # tmp files
 tmp.*
 # ignore __pycache__ folder
-*/__pycache__/*
+*/__pycache__/
