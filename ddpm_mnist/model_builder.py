@@ -1,9 +1,16 @@
-# model architecture
+"""!@file yz870/ddpm_mnist/model_builder.py
+@brief Model architecture for the Denoising Diffusion Probabilistic Model (DDPM) on MNIST dataset.
+
+@details This file contains noise schedular, CNNBlock, CNN with time embedding, and DDPM classes for the model architecture.
+@author Yichi Zhang (yz870) on 19/03/2024
+"""
+
 from typing import Dict, Tuple
 
 import numpy as np
 import torch
 import torch.nn as nn
+from torchmetrics.image import PeakSignalNoiseRatio,StructuralSimilarityIndexMeasure
 
 def ddpm_schedules(beta1: float, beta2: float, T: int) -> Dict[str, torch.Tensor]:
     """Returns pre-computed schedules for DDPM sampling with a linear noise schedule."""
@@ -139,6 +146,8 @@ class DDPM(nn.Module):
 
         self.n_T = n_T
         self.criterion = criterion
+        self.ssim = StructuralSimilarityIndexMeasure(data_range=1.0, kernel_size=3)
+        self.psnr = PeakSignalNoiseRatio()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Algorithm 18.1 in Prince"""
@@ -150,8 +159,12 @@ class DDPM(nn.Module):
         z_t = torch.sqrt(alpha_t) * x + torch.sqrt(1 - alpha_t) * eps
         # This is the z_t, which is sqrt(alphabar) x_0 + sqrt(1-alphabar) * eps
         # We should predict the "error term" from this z_t. Loss is what we return.
+        pred = self.gt(z_t, t / self.n_T)
+        mse = self.criterion(eps, pred)
+        ssim_val = self.ssim(pred,eps)
+        psnr_val = self.psnr(pred,eps)
 
-        return self.criterion(eps, self.gt(z_t, t / self.n_T))
+        return mse, ssim_val, psnr_val
 
     def sample(self, n_sample: int, size, device) -> torch.Tensor:
         """Algorithm 18.2 in Prince"""
