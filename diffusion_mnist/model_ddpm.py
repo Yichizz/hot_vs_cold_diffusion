@@ -1,4 +1,4 @@
-"""!@file yz870/ddpm_mnist/model_builder.py
+"""!@file model_builder.py
 @brief Model architecture for the Denoising Diffusion Probabilistic Model (DDPM) on MNIST dataset.
 
 @details This file contains noise schedular, CNNBlock, CNN with time embedding, and DDPM classes for the model architecture.
@@ -146,7 +146,7 @@ class DDPM(nn.Module):
 
         self.n_T = n_T
         self.criterion = criterion
-        self.ssim = StructuralSimilarityIndexMeasure(data_range=1.0, kernel_size=3)
+        self.ssim = StructuralSimilarityIndexMeasure(kernel_size=3)
         self.psnr = PeakSignalNoiseRatio()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

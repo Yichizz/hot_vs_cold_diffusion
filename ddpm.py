@@ -1,4 +1,4 @@
-"""!@mainpage Train DDPM
+"""!@mainpage Train/Evaluate DDPM
 @brief Train and Evaluate Denoising Diffusion Probabilistic Model (DDPM) on MNIST dataset.
 
 @details This script contains code to reproduce the results and figure of part 1 in the coursework.
@@ -21,10 +21,10 @@ from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 from accelerate import Accelerator
-from ddpm_mnist.utils import read_parameters, create_folder, save_losses, visualize_losses
-from ddpm_mnist.model_builder import CNN, DDPM
-from ddpm_mnist.engine import train
-from ddpm_mnist.evaluate import compute_fid, evaluate_losses
+from diffusion_mnist.utils import read_parameters, create_folder, save_losses, visualize_losses
+from diffusion_mnist.model_ddpm import CNN, DDPM
+from diffusion_mnist.engine import train
+from diffusion_mnist.evaluate import compute_fid, evaluate_losses
 
 
 def main_train():
