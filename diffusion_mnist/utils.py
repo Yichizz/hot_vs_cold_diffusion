@@ -39,6 +39,7 @@ def read_parameters(file_path: str) -> dict:
     params['hyperparameters_model']['betas'] = tuple(params['hyperparameters_model']['betas'])
     params['hyperparameters_model']['n_T'] = config.getint('hyperparameters_model', 'n_T', fallback=1000)
     params['hyperparameters_model']['activation'] = config.get('hyperparameters_model', 'activation', fallback='GeLU')
+    params['hyperparameters_model']['variance_schedular'] = config.getfloat('hyperparameters_model', 'variance_schedular', fallback=4)
 
     # section: hyperparameters_training
     params['hyperparameters_training']['batch_size'] = config.getint('hyperparameters_training', 'batch_size', fallback=128)
@@ -51,7 +52,7 @@ def read_parameters(file_path: str) -> dict:
     params['hyperparameters_evaluation']['n_samples'] = config.getint('hyperparameters_evaluation', 'n_samples', fallback=1000)
 
     # section: name
-    params['name']['model_name'] = config.get('name', 'model', fallback='ddpm_mnist')
+    params['name']['model_name'] = config.get('name', 'model_name', fallback='ddpm_mnist')
 
     return params
 

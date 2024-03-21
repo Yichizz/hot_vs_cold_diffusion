@@ -23,7 +23,7 @@ from torchvision.utils import save_image
 from accelerate import Accelerator
 from diffusion_mnist.utils import read_parameters, create_folder, save_losses, visualize_losses
 from diffusion_mnist.model_ddpm import CNN, DDPM
-from diffusion_mnist.engine import train
+from diffusion_mnist.engine import train_ddpm
 from diffusion_mnist.evaluate import compute_fid, evaluate_losses
 
 
@@ -53,6 +53,7 @@ def main_train():
 
     # Build the model
     hidden_channels = params['hyperparameters_model']['hidden_channels']
+    # specific to ddpm: betas to control the noise schedular
     betas = params['hyperparameters_model']['betas']
     n_T = params['hyperparameters_model']['n_T']
     activation = params['hyperparameters_model']['activation']
@@ -82,7 +83,7 @@ def main_train():
 
     # Train the model
     print("Start training...")
-    losses, psnr_vals, ssim_vals = train(model, trainloader, optimizer, n_epochs, accelerator.device, 
+    losses, psnr_vals, ssim_vals = train_ddpm(model, trainloader, optimizer, n_epochs, accelerator.device, 
                                          './samples', './model', name, early_stopping=early_st)
     print('Training finished.')
 
@@ -141,9 +142,11 @@ def main_evaluate():
     with torch.no_grad():
         xh = model.sample(n_samples, (1, 28, 28), accelerator.device)
         generated = xh.cpu().numpy()
-        save first 50 samples
-        for i in range(50):
+        # save first 50 samples if there are more than 50 samples
+        for i in range(n_samples):
             save_image(xh[i], f'./samples/{name}_final_sample_{i}.png')
+            if i == 50:
+                break
     print(f"Generated {n_samples} samples and saved the first 50 samples.")
 
     # compute FID: we use first batch of testloader

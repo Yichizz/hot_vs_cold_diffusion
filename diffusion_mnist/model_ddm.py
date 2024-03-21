@@ -7,7 +7,8 @@ This file contains the scheduler, CNN architecture and loss function for DDM arc
 @author Yichi Zhang (yz870) on 20/03/2024
 """
 
-from typing import Dict, Tuple
+import typing
+from typing import Tuple
 from scipy.stats import multivariate_normal
 import numpy as np
 import torch
@@ -15,11 +16,11 @@ import torch.nn as nn
 from torchmetrics.image import PeakSignalNoiseRatio,StructuralSimilarityIndexMeasure
 
 
-def ddm_schedules(variance: float, T: int, input_shape: Tuple[int, int]) -> torch.Tensor:
-    """!@brief Create a mask for the DDM model.
+def mask_t(variance: float = 1, T: int = 10, input_shape: Tuple[int, int] = (28, 28)) -> np.ndarray:
+    """!@brief Create a mask for time step T.
 
     @param variance: variance of the 2D Gaussian distribution.
-    @param T: number of time steps. 
+    @param T: time step.
     @param input_shape: input image shape.
 
     @return mask_t: mask for time step T.
@@ -31,18 +32,36 @@ def ddm_schedules(variance: float, T: int, input_shape: Tuple[int, int]) -> torc
     xx, yy = np.meshgrid(x, y)
     for t in range(T):
         # create a 2D gaussian distribution
-        mean = np.random.rand(2) * 28
+        mean = np.random.rand(2) * input_shape[0]
         cov = np.eye(2) * variance # identity matrix
         gaussian = multivariate_normal(mean=mean, cov=cov)
 
         # evaluate the gaussian at each pixel
         z_i = gaussian.pdf(np.dstack((xx, yy)))
-        # normalize the gaussian to 0-1
+        # normalize such that the peak has value 1
         z_i = (z_i - z_i.min()) / (z_i.max() - z_i.min())
-        # 1 - z_i then has center 0 (grey) and edge 1 (white)
+        # z_i then has center 1 (white) and edge 0 (black)
+        # but we want the center to be grey (0.5) and edge 1 (white)
+        # z_i = 0.5 + (1 - z_i) * 0.5
         mask_t *= (1 - z_i)
-        
     return mask_t
+
+def ddm_schedules(variance: float = 1, T: int = 10, input_shape: Tuple[int, int] = (28, 28)) -> dict:
+    """!@brief Create degradation for all time steps.
+
+    @param variance: variance of the 2D Gaussian distribution.
+    @param T: number of time steps.
+    @param input_shape: input image shape.
+
+    @return masks: masks for all time steps.
+    """
+    # create a tensor of shape (T, input_shape[0], input_shape[1])
+    masks = torch.zeros((T, input_shape[0], input_shape[1]))
+    for t in range(T):
+        mask = mask_t(T=t)
+        masks[t] = torch.from_numpy(mask)
+
+    return {"mask_t": masks}
 
 # we use the same CNN architecture as the original ddpm model
 class CNNBlock(nn.Module):
