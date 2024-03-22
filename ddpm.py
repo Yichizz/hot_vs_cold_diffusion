@@ -83,8 +83,7 @@ def main_train():
 
     # Train the model
     print("Start training...")
-    losses, psnr_vals, ssim_vals = train_ddpm(model, trainloader, optimizer, n_epochs, accelerator.device, 
-                                         './samples', './model', name, early_stopping=early_st)
+    losses, psnr_vals, ssim_vals, n_epochs = train_ddpm(model, trainloader, optimizer, n_epochs, accelerator.device, './samples', './model', name, early_stopping=early_st)
     print('Training finished.')
 
     # write losses to file
@@ -156,9 +155,9 @@ def main_evaluate():
 
     # compute mse, psnr, and ssim on test set using trained model
     test_mse, test_psnr, test_ssim = evaluate_losses(model, next(iter(testloader))[0], accelerator.device)
-    print(f"Mean Squared Error (MSE) on {len(testset)} test samples is {test_mse:.3f}.")
-    print(f"Peak Signal-to-Noise Ratio (PSNR) on {len(testset)} test samples is {test_psnr:.3f}.")
-    print(f"Structural Similarity (SSIM) on {len(testset)} test samples is {test_ssim:.3f}.")
+    print(f"Mean Squared Error (MSE) on {n_samples} test samples is {test_mse:.3f}.")
+    print(f"Peak Signal-to-Noise Ratio (PSNR) on {n_samples} test samples is {test_psnr:.3f}.")
+    print(f"Structural Similarity (SSIM) on {n_samples} test samples is {test_ssim:.3f}.")
 
 
 if __name__ == "__main__":

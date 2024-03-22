@@ -14,7 +14,7 @@ from torchvision.utils import save_image, make_grid
 
 # Define the training function for the DDPM model
 def train_ddpm(model, dataloader, optimizer, epochs, device, sampling_dir, model_dir, name, 
-          early_stopping=False, patience=5, min_delta=0.001):
+          early_stopping=False, patience=5, min_delta=1e-4):
     """!@brief Train the DDPM model on the MNIST dataset.
 
     @param model The DDPM model to be trained.
@@ -65,8 +65,9 @@ def train_ddpm(model, dataloader, optimizer, epochs, device, sampling_dir, model
         ssim_epoch.append(np.mean(ssim_vals[-len(dataloader):]))
         # early stopping
         if early_stopping and len(loss_epoch) > patience + 1:
-            if loss_epoch[-patience] - loss_epoch[-1] < min_delta:
+            if loss_epoch[-1-patience] - loss_epoch[-1] <= min_delta:
                 print(f"Early stopping at epoch {i+1}.")
+                n_epoch = i+1
                 break
 
         model.eval()
@@ -80,7 +81,7 @@ def train_ddpm(model, dataloader, optimizer, epochs, device, sampling_dir, model
             # save model
             torch.save(model.state_dict(), model_dir + f"/{name}.pth")
 
-    return loss_epoch, psnr_epoch, ssim_epoch
+    return loss_epoch, psnr_epoch, ssim_epoch, n_epoch
 
 # Define the evaluation function for the DDM model
 # main difference here is in sampling from the model
@@ -136,8 +137,9 @@ def train_ddm(model, dataloader, optimizer, epochs, device, sampling_dir, model_
         ssim_epoch.append(np.mean(ssim_vals[-len(dataloader):]))
         # early stopping
         if early_stopping and len(loss_epoch) > patience + 1:
-            if loss_epoch[-patience] - loss_epoch[-1] < min_delta:
+            if loss_epoch[-1-patience] - loss_epoch[-1] < min_delta:
                 print(f"Early stopping at epoch {i+1}.")
+                n_epoch = i+1
                 break
 
         model.eval()
@@ -153,4 +155,4 @@ def train_ddm(model, dataloader, optimizer, epochs, device, sampling_dir, model_
             # save model
             torch.save(model.state_dict(), model_dir + f"/{name}.pth")
 
-    return loss_epoch, psnr_epoch, ssim_epoch
+    return loss_epoch, psnr_epoch, ssim_epoch, n_epoch

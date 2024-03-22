@@ -27,15 +27,19 @@ def compute_fid(generated_samples, true_samples, device):
     # we can use torchvision.transforms to do this
     transform = transforms.Compose([
         transforms.Resize((299, 299)),
-        transforms.Lambda(lambda x: x.expand(3, -1, -1))
+        transforms.Lambda(lambda x: x.expand(3, -1, -1)), # expand to 3 channels
     ])
     generated_samples = torch.cat([transform(x) for x in generated_samples], 0)
     true_samples = torch.cat([transform(x) for x in true_samples], 0)
-    generated_samples = generated_samples.view(-1, 3, 299, 299).to(torch.uint8).to(device)
-    true_samples = true_samples.view(-1, 3, 299, 299).to(device).to(torch.uint8).to(device)
+    # sample pixel values to [0,1]
+    generated_samples = (generated_samples - generated_samples.min())/ (generated_samples.max() - generated_samples.min())
+    true_samples = (true_samples - true_samples.min())/ (true_samples.max() - true_samples.min())
+
+    generated_samples = generated_samples.view(-1, 3, 299, 299).to(device)
+    true_samples = true_samples.view(-1, 3, 299, 299).to(device)
 
     # Compute the FID
-    fid = FrechetInceptionDistance(feature=64)
+    fid = FrechetInceptionDistance(feature=64, normalize=True)
     fid.update(true_samples, real=True)
     fid.update(generated_samples, real=False)
     print('Computing FID...')

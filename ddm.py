@@ -87,7 +87,7 @@ def main_train():
 
     # Train the model
     print("Start training the model...")
-    losses, psnr_vals, ssim_vals = train_ddm(model, trainloader, optimizer, n_epochs, accelerator.device,
+    losses, psnr_vals, ssim_vals, n_epochs = train_ddm(model, trainloader, optimizer, n_epochs, accelerator.device,
                                             './samples', './model', name = name, early_stopping=early_stopping)
     
     # write losses to file

@@ -193,7 +193,7 @@ class DDM(nn.Module):
         variance_schedular: float,
         n_T: int,
         expected_shape: Tuple[int, int],
-        criterion: nn.Module = nn.MSELoss(),
+        criterion: nn.Module = nn.L1Loss(),
     ) -> None:
         super().__init__()
 
@@ -213,22 +213,24 @@ class DDM(nn.Module):
 
     def degrade(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         # now, our z_t is the input image x, multiplied by the mask at time t
-        masks = self.mask_t[t].unsqueeze(1).to(x.device) # (batch, 1, 28, 28)
+        masks = self.mask_t[t-1].unsqueeze(1).to(x.device) # (batch, 1, 28, 28)
         z_t = x * masks
         return z_t
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # random time step with shape (batch,)
-        t = torch.randint(1, self.n_T, (x.shape[0],), device=x.device)
+        t = torch.randint(1, self.n_T, (x.shape[0],), device=x.device)           
         z_t = self.degrade(x, t)
-        # change eps to x, as we are not adding noise
-        # we train the model to find the restoration of the image directly
-        pred_x = self.gt(z_t, t / self.n_T)
-        mse = self.criterion(x, pred_x)
-        ssim_val = self.ssim(pred_x, x)
-        psnr_val = self.psnr(pred_x, x)
+        # return all the masks at all random time steps
+        noise = self.mask_t[t-1].unsqueeze(1).to(x.device)
+        
+        # we train the model to find the noise (inpainting)
+        pred_noise = self.gt(z_t, t / self.n_T)
+        loss = self.criterion(pred_noise, noise) 
+        ssim_val = self.ssim(pred_noise, noise)
+        psnr_val = self.psnr(pred_noise, noise)
 
-        return mse, ssim_val, psnr_val
+        return loss, ssim_val, psnr_val
 
     def sample(self, n_sample: int, size, original_sample, device) -> torch.Tensor:
         """Algorithm 2 in Bansal et al., (2022)"""
@@ -237,16 +239,15 @@ class DDM(nn.Module):
         # we degrade the original sample with n_T masks
         assert original_sample.shape[0] >= n_sample, "original_sample must have at least n_sample samples"
         assert original_sample.shape[1:] == size, "original_sample must have the same size as size"
-        z = original_sample[:n_sample, :] # z has shape (n_sample, *size)
+        z = original_sample[:n_sample, :] # z has shape (n_sample, *size)#
         z_t = z * self.mask_t[self.n_T-1].to(device)
 
         _one = torch.ones(n_sample, device=device)
 
-        for t in range(self.n_T, 1, -1):
-            # since the mask_t are from 0 to T-1, we need to use t-1 and t-2
-            mask = self.mask_t[t-1].to(device)
-            mask_pre = self.mask_t[t-2].to(device)
-            z_0 = self.gt(z_t, (t/self.n_T) * _one)
-            z_t = z_t - z_0 * mask + z_0 * mask_pre
+        for t in range(self.n_T, 0, -1): 
+            # since the , we need to use t-1 and t-2
+            # the restoration is z_t - pred_noise
+            z_0 = z_t - self.gt(z_t, (t/self.n_T) * _one)
+            z_t = z_t - z_0 * self.mask_t[t-1].to(device) + z_0 * self.mask_t[t-2].to(device)
 
         return z_t
