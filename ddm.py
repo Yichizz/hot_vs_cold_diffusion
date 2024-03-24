@@ -6,7 +6,7 @@ Defading Diffusion Model (DDM) is a special case of Generalized Diffusion Model 
 For hyperparameter tuning, please change the parameters.ini file in the folder.
 For training the model, please run the following command:
 ```bash
-python ddm.py --ini_file parameters.ini --mode train
+python ddm.py --ini_file parameters.ini --mode train/evaluate
 ```
 @author Yichi Zhang (yz870) on 20/03/2024
 """
@@ -98,6 +98,7 @@ def main_train():
 def main_evaluate():
     # intialized the model
     params = read_parameters(param_file)
+    create_folder(data_dir='./data', model_dir='./model', sample_dir='./samples', loss_dir='./losses')
     hidden_channels = params['hyperparameters_model']['hidden_channels']
     n_T = params['hyperparameters_model']['n_T']
     activation = params['hyperparameters_model']['activation']
@@ -150,7 +151,7 @@ def main_evaluate():
         # save first 50 samples if there are more than 50 samples
         for i in range(n_samples):
             save_image(xh[i], f'./samples/{name}_final_sample_{i}.png')
-            if i == 50:
+            if i == 0:
                 break
     print(f"Generated {n_samples} samples and saved the first 50 samples.")
 

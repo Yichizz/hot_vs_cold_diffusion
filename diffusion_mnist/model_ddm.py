@@ -222,13 +222,12 @@ class DDM(nn.Module):
         t = torch.randint(1, self.n_T, (x.shape[0],), device=x.device)           
         z_t = self.degrade(x, t)
         # return all the masks at all random time steps
-        noise = self.mask_t[t-1].unsqueeze(1).to(x.device)
+        # noise = self.mask_t[t-1].unsqueeze(1).to(x.device)
         
-        # we train the model to find the noise (inpainting)
-        pred_noise = self.gt(z_t, t / self.n_T)
-        loss = self.criterion(pred_noise, noise) 
-        ssim_val = self.ssim(pred_noise, noise)
-        psnr_val = self.psnr(pred_noise, noise)
+        pred = self.gt(z_t, t / self.n_T)
+        loss = self.criterion(pred,x)
+        ssim_val = self.ssim(pred, x)
+        psnr_val = self.psnr(pred, x)
 
         return loss, ssim_val, psnr_val
 
@@ -247,7 +246,7 @@ class DDM(nn.Module):
         for t in range(self.n_T, 0, -1): 
             # since the , we need to use t-1 and t-2
             # the restoration is z_t - pred_noise
-            z_0 = z_t - self.gt(z_t, (t/self.n_T) * _one)
+            z_0 = self.gt(z_t, (t/self.n_T) * _one)
             z_t = z_t - z_0 * self.mask_t[t-1].to(device) + z_0 * self.mask_t[t-2].to(device)
 
         return z_t
