@@ -41,7 +41,7 @@ def mask_t(variance: float = 1, T: int = 10, input_shape: Tuple[int, int] = (28,
         # normalize such that the peak has value 1
         z_i = (z_i - z_i.min()) / (z_i.max() - z_i.min())
         # z_i then has center 1 (white) and edge 0 (black)
-        # but we want the center to be grey (0.5) and edge 1 (white)
+        # but we want the center to be grey (0) and edge 1 (white)
         # z_i = 0.5 + (1 - z_i) * 0.5
         mask_t *= (1 - z_i)
     return mask_t
@@ -248,5 +248,6 @@ class DDM(nn.Module):
             # the restoration is z_t - pred_noise
             z_0 = self.gt(z_t, (t/self.n_T) * _one)
             z_t = z_t - z_0 * self.mask_t[t-1].to(device) + z_0 * self.mask_t[t-2].to(device)
+            # z_t = z_0 * self.mask_t[t-2].to(device) naive implementation
 
         return z_t

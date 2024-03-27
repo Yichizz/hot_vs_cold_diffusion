@@ -11,3 +11,6 @@ data/
 tmp.*
 # ignore __pycache__ folder
 */__pycache__/
+# ignore docs folder
+docs/*
+!docs/Doxyfile
