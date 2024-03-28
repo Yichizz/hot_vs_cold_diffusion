@@ -1,7 +1,7 @@
 """!@file engine.py
 @brief Training engine for the Denoising Diffusion Probabilistic Model (DDPM) on MNIST dataset.
 
-@details This file contains the training function for the DDPM model. 
+@details This file contains the training function for the DDPM and DDM.
 The trainign process records the loss, PSNR, and SSIM values for each epoch and saves the model and samples to the specified directory.
 @author Yichi Zhang (yz870) on 19/03/2024
 """

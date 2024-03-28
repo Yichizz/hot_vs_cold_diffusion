@@ -1,10 +1,9 @@
 """!@file evaluate.py
-@brief Evaluation functions for the Denoising Diffusion Probabilistic Model (DDPM) on MNIST dataset.
+@brief Evaluation functions for the DDPM and DDM on MNIST dataset.
 
 @details This file contains evaluation functions including
 - compute_fid: compute the Frechet Inception Distance (FID) for the generated samples
-- compute_nll: compute the negative log-likelihood (NLL) for the generated samples
-
+- evaluate_losses: evaluate the loss values, PSNR, and SSIM for the trained model on unseen test data
 @author Yichi Zhang (yz870) on 19/03/2024
 """
 
