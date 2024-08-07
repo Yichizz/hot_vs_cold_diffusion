@@ -1,5 +1,5 @@
 **********************************************
-# Application of Machine Learning: Diffusion Models on MNIST Dataset
+# Diffusion Models on MNIST Dataset
 **********************************************
 
 ## Description
