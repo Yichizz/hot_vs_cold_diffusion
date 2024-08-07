@@ -9,7 +9,7 @@ This project contains the codes used for training and evaluating Denoising Diffu
 To install this project, follow these steps:
 1. Clone from the Gitlab Repository
 ```
-git clone https://gitlab.developers.cam.ac.uk/phy/data-intensive-science-mphil/m2_Assessment/yz870.git
+git clone https://github.com/Yichizz/hot_vs_cold_diffusion.git
 ```
 2. Create and activate new conda environment
 ```
