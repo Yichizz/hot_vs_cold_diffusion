@@ -13,7 +13,7 @@ git clone https://github.com/Yichizz/hot_vs_cold_diffusion.git
 ```
 2. Create and activate new conda environment
 ```
-cd yz870
+cd hot_vs_cold_diffusion
 conda env create -f environment.yml
 conda activate cw_aml
 ```
